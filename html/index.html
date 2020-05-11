@@ -1,0 +1,182 @@
+<html>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <style>
+      body {
+        background-color: lightgray;
+        font-family: 'Roboto', sans-serif;
+        font-weight: 600;
+        text-shadow: 1px 1px 1px #000, 0 0 2px #000;
+        margin: 0;
+        overflow: hidden;
+        overflow-y: scroll;
+        overflow-x: hidden;
+        color: #fff;
+      }
+
+      div.post {
+        position: relative;
+        width: 95%;
+        margin: 5px auto;
+        padding: 0;
+        border: 2px solid #000;
+        background-color: rgba(0, 0, 0, 0.5);
+      }
+
+      td.userimage {
+        padding: 3px;
+        vertical-align: top;
+      }
+
+      img.userimage {
+        position: relative;
+        z-index: 1;
+        border-radius: 3px;
+        margin-top: 4px;
+        margin-left: 3px;
+      }
+
+      img {
+          border: 0;
+      }
+
+      td.status-body {
+        width: 100%;
+        font-size: 20px;
+        padding-left: 4px;
+        line-height: 1.4em;
+        padding-top: 0;
+        padding-bottom: 0;
+        margin: 0;
+        position: relative;
+        vertical-align: top;
+        display: table-cell;
+      }
+
+      .postinner {
+        margin-bottom: 3px;
+        margin-right: 5px;
+        word-wrap: break-word;
+      }
+
+      .postinner .username {
+        display: block;
+        margin-top: 7px;
+        margin-bottom: 1px;
+      }
+
+      p.message {
+       margin: 0;
+      }
+
+      p.retweeted {
+        margin: 0;
+        font-size: 16px;
+      }
+
+      .slide-fade-enter-active {
+        transition: all .5s ease;
+      }
+      .slide-fade-leave-active {
+        transition: all .5s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+      }
+      .slide-fade-enter, .slide-fade-leave-to
+      /* .slide-fade-leave-active below version 2.1.8 */ {
+        transform: translateX(-700px);
+        opacity: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="tweet">
+      <transition name="slide-fade">
+        <div v-if="show" class="post">
+          <table cellspacing="0" cellpadding="0">
+            <tr>
+              <td class="userimage">
+                <img class="userimage" width="48" height="48" v-bind:src="profileURL">
+              </td>
+              <td class="status-body">
+                <div class="postinner">
+                  <div class="username">
+                    <strong>{{username}}</strong> <span>{{screenname}}</span>
+                  </div>
+                  <p class="message">
+                    <span class="msgtext">
+                      {{ message }}
+                    </span>
+                  </p>
+                  <p class="retweeted">
+                    {{ rtname }}
+                  </p>
+                </div>
+              </td>
+            </tr>
+          </table>
+        </div>
+      </transition>
+    </div>
+    <script>
+      var app = new Vue({
+        el: '#tweet',
+        data: {
+          message: '',
+          profileURL: '1px.png',
+          username: '',
+          screenname: '',
+          rtname: '',
+          show: false
+        },
+        created: function () {
+          this.nextTweet();
+        },
+        methods: {
+          interstitial: function () {
+            this.show = false;
+            this.timer = setTimeout(this.nextTweet, 500);
+          },
+          nextTweet: function () {
+            console.log("Request next tweet");
+            axios.get('/next')
+              .then(function (response) {
+                if (response.data.empty) {
+                  app.message = "";
+                  app.profileURL = '1px.png';
+                  app.username = '';
+                  app.screenname = '';
+                  app.rtname = '';
+                } else {
+                  app.message = "";
+                  var tweet = response.data;
+                  app.username = tweet.user.name;
+                  app.screenname = "@"+tweet.user.screen_name;
+                  app.profileURL = tweet.user.profile_image_url_https;
+
+                  if (tweet.retweeted_status != null) {
+                    console.log("Tweet is RT");
+                    app.rtname = "Retweeted by "+app.username;
+
+                    tweet = response.data.retweeted_status;
+                    app.username = tweet.user.name;
+                    app.screenname = "@"+tweet.user.screen_name;
+                    app.profileURL = tweet.user.profile_image_url_https;
+                  }
+                  if (tweet.extended_tweet != null) {
+                    console.log("Tweet is extended");
+                    app.message += tweet.extended_tweet.full_text;
+                  } else {
+                    app.message += tweet.text;
+                  }
+                  app.show = true;
+                }
+              });
+            this.timer = setTimeout(this.interstitial, 20000);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
