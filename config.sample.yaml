@@ -1,4 +1,5 @@
-consumer_key: "asdfghjkl"
-consumer_secret: "asdfghjkl"
-access_token: "asdfghjkl"
-access_token_secret: "asdfghjkl"
+consumer_key: asdfghjkl
+consumer_secret: asdfghjkl
+access_token: asdfghjkl
+access_token_secret: asdfghjkl
+gfm_campaign_uri: campaign-uri-after-f
