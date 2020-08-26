@@ -54,7 +54,7 @@ var twitter = new Twit({
 var tweets = [];
 
 var tweetStream = twitter.stream('statuses/filter', {
-  track: '@aniclover, #aniclover, #aniunison, #anikuraunison',
+  track: '@aniclover, #aniclover, #anicloversary',
   follow: '1145783232824147968'
 });
 tweetStream.on('tweet', function (tweet) {
